@@ -8,11 +8,16 @@ try:
     langfuse_client = get_client()
 
     class _LangfuseContext:
-        def update_current_trace(self, **kwargs: Any) -> None:
-            langfuse_client.update_current_trace(**kwargs)
+        def update_current_trace(self, user_id: str = None, session_id: str = None, tags: list = None, **kwargs: Any) -> None:
+            # SDK v3: no update_current_trace — set tags via span metadata, session/user via OTel attributes
+            meta = {k: v for k, v in {"user_id": user_id, "session_id": session_id}.items() if v}
+            if tags:
+                meta["tags"] = tags
+            if meta:
+                langfuse_client.update_current_span(metadata=meta)
 
         def update_current_observation(self, **kwargs: Any) -> None:
-            langfuse_client.update_current_observation(**kwargs)
+            langfuse_client.update_current_generation(**kwargs)
 
         def flush(self) -> None:
             langfuse_client.flush()
