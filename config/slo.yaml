@@ -1,16 +1,49 @@
 service: day13-observability-lab
-window: 28d
+owner: member-c-slo-alerts
+description: SLOs for the Day 13 observability lab FastAPI agent.
+default_window: 28d
 slis:
   latency_p95_ms:
+    display_name: Latency P95
+    metric: latency_p95
     objective: 3000
-    target: 99.5
-    note: Replace with your group's target
+    operator: less_than
+    unit: ms
+    window: 28d
+    target_percent: 99.5
+    dashboard_panel: Latency P50/P95/P99
+    alert: high_latency_p95
+    rationale: Keeps tail latency below the user-visible slow response threshold.
   error_rate_pct:
+    display_name: Error Rate
+    metric: error_rate_pct
     objective: 2
-    target: 99.0
+    operator: less_than
+    unit: percent
+    window: 28d
+    target_percent: 99.0
+    dashboard_panel: Error rate with breakdown
+    alert: high_error_rate
+    rationale: Keeps failed responses below the lab availability target.
   daily_cost_usd:
+    display_name: Daily Cost Budget
+    metric: total_cost_usd
     objective: 2.5
-    target: 100.0
+    operator: less_than
+    unit: usd_per_day
+    window: 1d
+    target_percent: 100.0
+    dashboard_panel: Cost over time
+    alert: cost_budget_spike
+    rationale: Prevents token or model routing spikes from burning the demo budget.
   quality_score_avg:
+    display_name: Average Quality Score
+    metric: quality_avg
     objective: 0.75
-    target: 95.0
+    operator: greater_than_or_equal
+    unit: score
+    window: 28d
+    target_percent: 95.0
+    dashboard_panel: Quality proxy
+    alert: null
+    rationale: Tracks answer quality as a guardrail while optimizing latency and cost.

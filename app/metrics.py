@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import time
 from collections import Counter
 from statistics import mean
 
 REQUEST_LATENCIES: list[int] = []
 REQUEST_COSTS: list[float] = []
+REQUEST_COST_EVENTS: list[tuple[float, float]] = []
 REQUEST_TOKENS_IN: list[int] = []
 REQUEST_TOKENS_OUT: list[int] = []
 ERRORS: Counter[str] = Counter()
@@ -17,6 +19,7 @@ def record_request(latency_ms: int, cost_usd: float, tokens_in: int, tokens_out:
     TRAFFIC += 1
     REQUEST_LATENCIES.append(latency_ms)
     REQUEST_COSTS.append(cost_usd)
+    REQUEST_COST_EVENTS.append((time.time(), cost_usd))
     REQUEST_TOKENS_IN.append(tokens_in)
     REQUEST_TOKENS_OUT.append(tokens_out)
     QUALITY_SCORES.append(quality_score)
@@ -36,15 +39,47 @@ def percentile(values: list[int], p: int) -> float:
     return float(items[idx])
 
 
+def total_errors() -> int:
+    return sum(ERRORS.values())
+
+
+def error_rate_pct() -> float:
+    total_requests = TRAFFIC + total_errors()
+    if total_requests == 0:
+        return 0.0
+    return round((total_errors() / total_requests) * 100, 2)
+
+
+def hourly_cost_usd() -> float:
+    cutoff = time.time() - 3600
+    return round(sum(cost for ts, cost in REQUEST_COST_EVENTS if ts >= cutoff), 4)
+
 
 def snapshot() -> dict:
+    latency_p50 = percentile(REQUEST_LATENCIES, 50)
+    latency_p95 = percentile(REQUEST_LATENCIES, 95)
+    latency_p99 = percentile(REQUEST_LATENCIES, 99)
+    total_cost = round(sum(REQUEST_COSTS), 4)
+    hourly_cost = hourly_cost_usd()
+    errors_count = total_errors()
+    request_count = TRAFFIC + errors_count
+
     return {
         "traffic": TRAFFIC,
-        "latency_p50": percentile(REQUEST_LATENCIES, 50),
-        "latency_p95": percentile(REQUEST_LATENCIES, 95),
-        "latency_p99": percentile(REQUEST_LATENCIES, 99),
+        "successful_requests": TRAFFIC,
+        "failed_requests": errors_count,
+        "request_count": request_count,
+        "latency_p50": latency_p50,
+        "latency_p50_ms": latency_p50,
+        "latency_p95": latency_p95,
+        "latency_p95_ms": latency_p95,
+        "latency_p99": latency_p99,
+        "latency_p99_ms": latency_p99,
+        "error_rate_pct": error_rate_pct(),
         "avg_cost_usd": round(mean(REQUEST_COSTS), 4) if REQUEST_COSTS else 0.0,
-        "total_cost_usd": round(sum(REQUEST_COSTS), 4),
+        "total_cost_usd": total_cost,
+        "daily_cost_usd": total_cost,
+        "hourly_cost_usd": hourly_cost,
         "tokens_in_total": sum(REQUEST_TOKENS_IN),
         "tokens_out_total": sum(REQUEST_TOKENS_OUT),
         "error_breakdown": dict(ERRORS),

@@ -1,19 +1,46 @@
 alerts:
   - name: high_latency_p95
     severity: P2
+    sli: latency_p95_ms
+    metric: latency_p95
     condition: latency_p95_ms > 5000 for 30m
+    threshold: 5000
+    unit: ms
+    window: 30m
     type: symptom-based
     owner: team-oncall
+    dashboard_panel: Latency P50/P95/P99
     runbook: docs/alerts.md#1-high-latency-p95
+    summary: P95 latency is above the SLO burn threshold.
+    likely_incidents:
+      - rag_slow
   - name: high_error_rate
     severity: P1
+    sli: error_rate_pct
+    metric: error_rate_pct
     condition: error_rate_pct > 5 for 5m
+    threshold: 5
+    unit: percent
+    window: 5m
     type: symptom-based
     owner: team-oncall
+    dashboard_panel: Error rate with breakdown
     runbook: docs/alerts.md#2-high-error-rate
+    summary: Error rate is high enough to affect users.
+    likely_incidents:
+      - tool_fail
   - name: cost_budget_spike
     severity: P2
+    sli: daily_cost_usd
+    metric: total_cost_usd
     condition: hourly_cost_usd > 2x_baseline for 15m
+    threshold: 2x_baseline
+    unit: usd
+    window: 15m
     type: symptom-based
     owner: finops-owner
+    dashboard_panel: Cost over time
     runbook: docs/alerts.md#3-cost-budget-spike
+    summary: Hourly cost is growing faster than the expected baseline.
+    likely_incidents:
+      - cost_spike
