@@ -72,13 +72,21 @@
 
 ## 5. Individual Contributions & Evidence
 
-### [MEMBER_A_NAME]
+### [Nguyễn Lê Trung] — Member A: Logging & PII
 - [TASKS_COMPLETED]:
-- [EVIDENCE_LINK]:
+  - Implement `CorrelationIdMiddleware` (`app/middleware.py`): sinh `x-request-id` duy nhất cho mỗi request (lấy từ header hoặc tự sinh `req-{uuid8}`), bind vào structlog context để tất cả log trong request tự động mang `correlation_id`, trả về header `x-request-id` và `x-response-time-ms` trong response.
+  - Implement PII scrubber (`app/pii.py`): 15 regex pattern bao phủ email, phone VN, CCCD, CMND, credit card, passport, MST, số tài khoản, BHXH, BHYT, GPLX, biển số xe, ngày sinh, IP, địa chỉ; hàm `scrub_text()` thay thế bằng `[REDACTED_<TYPE>]`, `summarize_text()` kết hợp scrub + truncate, `hash_user_id()` dùng SHA-256.
+  - Cấu hình structlog pipeline (`app/logging_config.py`): gắn `scrub_event` processor vào chain để tự động scrub PII trong mọi log, `JsonlFileProcessor` ghi song song ra `data/logs.jsonl`, đảm bảo output JSON đúng schema `config/logging_schema.json`.
+  - Enrich log context (`app/main.py`): `bind_contextvars` với `user_id_hash`, `session_id`, `feature`, `model`, `env` cho mỗi request; thêm `load_dotenv()` để app load đúng biến môi trường khi khởi động.
+- [EVIDENCE_LINK]: [app/middleware.py](../app/middleware.py), [app/pii.py](../app/pii.py), [app/logging_config.py](../app/logging_config.py), [app/main.py](../app/main.py), https://github.com/West2light/Lab13-E403-Team06-Observability/commit/77c8b42a1d54b8ddb74f3a7cbf38aa3c6e993dd5
 
-### [MEMBER_B_NAME]
+### [Nguyễn Lê Trung] — Member B: Tracing & Enrichment
 - [TASKS_COMPLETED]:
-- [EVIDENCE_LINK]:
+  - Adapt `app/tracing.py` tương thích Langfuse SDK v3: thay `langfuse.decorators` (SDK v2) bằng `from langfuse import observe, get_client`; implement `_LangfuseContext` wrapper map `update_current_trace` → `update_current_span` và `update_current_observation` → `update_current_generation` để giữ nguyên interface cho `agent.py`.
+  - Đảm bảo `@observe()` decorator trên `LabAgent.run()` (`app/agent.py`) gửi trace lên Langfuse với đầy đủ tags `["lab", feature, model]`, metadata RAG (`doc_count`, `query_preview`), và `usage_details` token.
+  - Debug và fix lỗi 500 do API breaking change của Langfuse SDK v3 (`update_current_trace`, `update_current_observation` không còn tồn tại).
+  - Xác nhận `tracing_enabled: true` qua `/health` endpoint và verify 20+ traces xuất hiện trên Langfuse cloud dashboard.
+- [EVIDENCE_LINK]: [app/tracing.py](../app/tracing.py), [app/agent.py](../app/agent.py), https://github.com/West2light/Lab13-E403-Team06-Observability/commit/63f714fdb9c64bd5246e27587e6731d328ea2aa9
 
 ### [Phạm Anh Dũng]
 - [TASKS_COMPLETED]: Định nghĩa SLO/SLI cho latency P95, error rate, daily cost budget và quality score; thiết kế alert rules symptom-based cho `high_latency_p95`, `high_error_rate`, `cost_budget_spike`; liên kết alert với dashboard panel, runbook và incident lab tương ứng; viết runbook điều tra theo luồng metrics -> traces -> logs bằng `correlation_id`; chuẩn bị evidence cho phần Alerts & Runbook của group report.
