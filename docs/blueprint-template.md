@@ -15,15 +15,17 @@
 ---
 
 ## 2. Group Performance (Auto-Verified)
+```
 - [VALIDATE_LOGS_FINAL_SCORE]: 100/100
 - [TOTAL_TRACES_COUNT]: 271
 - [PII_LEAKS_FOUND]: 0
-
+```
 ---
 
 ## 3. Technical Evidence (Group)
 
 ### 3.1 Logging & Tracing
+```
 - [EVIDENCE_CORRELATION_ID_SCREENSHOT]: ![correlation_id.png](https://github.com/West2light/Lab13-E403-Team06-Observability/blob/main/correlation_id.png)
 - [EVIDENCE_PII_REDACTION_SCREENSHOT]: ![pii_redaction.png](https://github.com/West2light/Lab13-E403-Team06-Observability/blob/main/pii_redaction.png)
 - [EVIDENCE_TRACE_WATERFALL_SCREENSHOT]: ![trace_waterfall.png](https://github.com/West2light/Lab13-E403-Team06-Observability/blob/main/trace_waterfall.png)
@@ -31,9 +33,12 @@
   và LLM generation, hoàn thành trong 0.16s ở điều kiện bình thường. Khi kích hoạt incident
   rag_slow, span này kéo dài lên ~2.65s do bị delay cưỡng bức 2.5s ở bước retrieval, trở
   thành span chiếm thời gian lớn nhất trong waterfall.
+```
 
 ### 3.2 Dashboard & SLOs
+```
 - [DASHBOARD_6_PANELS_SCREENSHOT]: ![dashboard_6panels.png](https://github.com/West2light/Lab13-E403-Team06-Observability/blob/main/dashboard_6panels.png)
+```
 - [SLO_TABLE]:
 
   | SLI | Target | Window | Current Value |
@@ -43,12 +48,14 @@
   | Cost Budget | < $2.5/day | 1d | $0.024/day |
 
 ### 3.3 Alerts & Runbook
+```
 - [ALERT_RULES_SCREENSHOT]: ![alert_rules.png](https://github.com/West2light/Lab13-E403-Team06-Observability/blob/main/alert_rules.png)
 - [SAMPLE_RUNBOOK_LINK]: docs/alerts.md#1-high-latency-p95
-
+```
 ---
 
 ## 4. Incident Response (Group)
+```
 - [SCENARIO_NAME]: rag_slow
 - [SYMPTOMS_OBSERVED]: Latency P95 tăng từ ~156ms lên ~2651ms, vượt ngưỡng SLO 3000ms. Tất
   cả request đều bị chậm đồng loạt, không có lỗi HTTP nhưng response time tăng gấp 17 lần.
@@ -60,7 +67,7 @@
 - [PREVENTIVE_MEASURE]: Đặt timeout cho RAG retrieval, thêm circuit breaker khi latency vượt
   ngưỡng, và alert tự động khi P95 > 5000ms trong 30 phút liên tiếp (đã định nghĩa trong
   config/alert_rules.yaml).
-
+```
 ---
 
 ## 5. Individual Contributions & Evidence
@@ -82,7 +89,7 @@
   `tool_fail`, and `cost_spike`; collected terminal output and structured log evidence from
   `data/logs.jsonl`; compared latency, error, token, and cost behavior across scenarios;
   prepared evidence for dashboard and incident response analysis.
-- [EVIDENCE_LINK]: 256e28f7105d69632eca796563e68893fd110c8e, [docs/D_report.md](docs/D_report.md)
+- [EVIDENCE_LINK]: https://github.com/West2light/Lab13-E403-Team06-Observability/commit/256e28f7105d69632eca796563e68893fd110c8e, [docs/D_report.md](docs/D_report.md)
 
 ### [Vương Hoàng Giang]
 - [TASKS_COMPLETED]: Xây dựng in-memory metrics helpers (app/metrics.py) với các hàm
