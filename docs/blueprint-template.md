@@ -9,7 +9,7 @@
   - Member A: [Name] | Role: Logging & PII
   - Member B: [Name] | Role: Tracing & Enrichment
   - Member C: [Name] | Role: SLO & Alerts
-  - Member D: [Name] | Role: Load Test & Dashboard
+  - Member D: Dương Quang Đông | Role: Load Test & Dashboard
   - Member E: [Name] | Role: Demo & Report
 
 ---
