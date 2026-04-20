@@ -5,6 +5,9 @@ import os
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from structlog.contextvars import bind_contextvars
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from .agent import LabAgent
 from .incidents import disable, enable, status
@@ -20,6 +23,16 @@ log = get_logger()
 app = FastAPI(title="Day 13 Observability Lab")
 app.add_middleware(CorrelationIdMiddleware)
 agent = LabAgent()
+
+
+@app.on_event("shutdown")
+async def shutdown() -> None:
+    if tracing_enabled():
+        try:
+            from .tracing import langfuse_context
+            langfuse_context.flush()
+        except Exception:
+            pass
 
 
 @app.on_event("startup")
