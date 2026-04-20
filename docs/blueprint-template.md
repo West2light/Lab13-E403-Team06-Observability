@@ -80,9 +80,9 @@
 - [TASKS_COMPLETED]:
 - [EVIDENCE_LINK]:
 
-### [MEMBER_C_NAME]
-- [TASKS_COMPLETED]:
-- [EVIDENCE_LINK]:
+### [Phạm Anh Dũng]
+- [TASKS_COMPLETED]: Định nghĩa SLO/SLI cho latency P95, error rate, daily cost budget và quality score; thiết kế alert rules symptom-based cho `high_latency_p95`, `high_error_rate`, `cost_budget_spike`; liên kết alert với dashboard panel, runbook và incident lab tương ứng; viết runbook điều tra theo luồng metrics -> traces -> logs bằng `correlation_id`; chuẩn bị evidence cho phần Alerts & Runbook của group report.
+- [EVIDENCE_LINK]: [docs/C_report.md](C_report.md), [docs/alerts.md](alerts.md), [config/slo.yaml](../config/slo.yaml), [config/alert_rules.yaml](../config/alert_rules.yaml), https://github.com/West2light/Lab13-E403-Team06-Observability/commit/2aac768d9d1b8aa06d821a1f375df04ce7bf1db3
 
 ### Dương Quang Đông
 - [TASKS_COMPLETED]: Executed baseline load testing and incident injection for `rag_slow`,

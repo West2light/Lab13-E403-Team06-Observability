@@ -1,105 +1,108 @@
-# Alert Rules and Runbooks
+# Quy tắc cảnh báo và Runbook
 
-Owner: Member C - SLO and Alerts
+**Chủ sở hữu**: Member C - SLO & Alerts
 
-This page is the runbook target for `config/alert_rules.yaml`. During demo, use the same investigation flow for every alert: start from metrics, open traces, then confirm the root cause in logs with the same `correlation_id`.
+Trang này là runbook được liên kết từ `config/alert_rules.yaml`. Khi demo hoặc xử lý incident, dùng cùng một luồng điều tra cho mọi cảnh báo: bắt đầu từ metrics, mở traces, sau đó xác nhận nguyên nhân trong logs bằng cùng `correlation_id`.
 
-## SLO Summary
+## Tóm tắt SLO
 
-| SLI | Target | Window | Main dashboard panel |
+| SLI | Mục tiêu | Cửa sổ đo | Panel dashboard chính |
 |---|---:|---|---|
 | Latency P95 | < 3000 ms | 28d | Latency P50/P95/P99 |
 | Error Rate | < 2% | 28d | Error rate with breakdown |
 | Daily Cost Budget | < $2.50/day | 1d | Cost over time |
 | Average Quality Score | >= 0.75 | 28d | Quality proxy |
 
-## 1. High latency P95
+<a id="1-high-latency-p95"></a>
+## 1. Độ trễ P95 cao
 
-- Alert name: `high_latency_p95`
-- Severity: P2
-- Trigger: `latency_p95_ms > 5000 for 30m`
-- Related SLO: Latency P95 < 3000 ms over 28d
-- Likely lab incident: `rag_slow`
-- Impact: users receive slow responses and tail latency breaches the SLO burn threshold.
+- **Tên alert**: `high_latency_p95`
+- **Mức độ nghiêm trọng**: P2
+- **Điều kiện kích hoạt**: `latency_p95_ms > 5000 for 30m`
+- **SLO liên quan**: Latency P95 < 3000 ms trong 28d
+- **Incident lab có khả năng liên quan**: `rag_slow`
+- **Tác động**: người dùng nhận phản hồi chậm, tail latency vượt ngưỡng burn của SLO.
 
-First checks:
+### Kiểm tra ban đầu
 
-1. Open the latency dashboard panel and confirm P95 is above 5000 ms for the last 30 minutes.
-2. Open the slowest traces from the last hour in Langfuse.
-3. Compare RAG, LLM, and tool spans to locate the slow component.
-4. Use the trace `correlation_id` to find matching JSON logs.
-5. Check whether the incident toggle `rag_slow` is enabled.
+1. Mở panel latency trên dashboard và xác nhận P95 vượt 5000 ms trong 30 phút gần nhất.
+2. Mở các trace chậm nhất trong 1 giờ gần nhất trên Langfuse.
+3. So sánh các span RAG, LLM và tool để xác định thành phần bị chậm.
+4. Dùng `correlation_id` trong trace để tìm JSON log tương ứng.
+5. Kiểm tra incident toggle `rag_slow` có đang bật hay không.
 
-Mitigation:
+### Giảm thiểu
 
-- Reduce prompt or context size for affected requests.
-- Fallback to a faster retrieval source if the RAG span is slow.
-- Temporarily lower concurrency or rate-limit expensive requests.
-- After mitigation, rerun traffic and verify P95 returns below 3000 ms.
+- Giảm kích thước prompt hoặc lượng context cho các request bị ảnh hưởng.
+- Dùng nguồn retrieval nhanh hơn nếu span RAG là nguyên nhân chính.
+- Tạm thời giảm concurrency hoặc rate-limit các request tốn tài nguyên.
+- Sau khi giảm thiểu, chạy lại traffic và xác nhận P95 quay về dưới 3000 ms.
 
-Evidence to capture:
+### Bằng chứng cần lưu
 
-- Screenshot of the latency panel with the threshold line.
-- Trace waterfall showing the slow span.
-- Log line with the same `correlation_id`.
+- Ảnh chụp panel latency có đường ngưỡng SLO.
+- Trace waterfall thể hiện span bị chậm.
+- Log line có cùng `correlation_id`.
 
-## 2. High error rate
+<a id="2-high-error-rate"></a>
+## 2. Tỷ lệ lỗi cao
 
-- Alert name: `high_error_rate`
-- Severity: P1
-- Trigger: `error_rate_pct > 5 for 5m`
-- Related SLO: Error Rate < 2% over 28d
-- Likely lab incident: `tool_fail`
-- Impact: users receive failed responses and the service availability target is at risk.
+- **Tên alert**: `high_error_rate`
+- **Mức độ nghiêm trọng**: P1
+- **Điều kiện kích hoạt**: `error_rate_pct > 5 for 5m`
+- **SLO liên quan**: Error Rate < 2% trong 28d
+- **Incident lab có khả năng liên quan**: `tool_fail`
+- **Tác động**: người dùng nhận phản hồi lỗi, mục tiêu availability của service bị đe dọa.
 
-First checks:
+### Kiểm tra ban đầu
 
-1. Open the error rate dashboard panel and confirm the error rate is above 5%.
-2. Group recent JSON logs by `error_type`.
-3. Use `correlation_id` to connect failed logs to failed traces.
-4. Inspect whether the failure is from the LLM, RAG retrieval, tool call, or response schema.
-5. Check recent changes or incident toggles before rolling back anything.
+1. Mở panel error rate trên dashboard và xác nhận tỷ lệ lỗi vượt 5%.
+2. Nhóm các JSON log gần nhất theo `error_type`.
+3. Dùng `correlation_id` để nối log lỗi với trace lỗi tương ứng.
+4. Kiểm tra lỗi đến từ LLM, RAG retrieval, tool call hay response schema.
+5. Kiểm tra thay đổi gần đây hoặc incident toggle trước khi rollback.
 
-Mitigation:
+### Giảm thiểu
 
-- Disable or bypass the failing tool when possible.
-- Retry with a fallback model or fallback retrieval path.
-- Roll back the latest risky change if failures started after deployment.
-- Verify the error rate drops below 2% after the fix.
+- Tắt hoặc bypass tool đang lỗi nếu có thể.
+- Retry bằng fallback model hoặc fallback retrieval path.
+- Rollback thay đổi rủi ro gần nhất nếu lỗi bắt đầu sau deployment.
+- Xác nhận error rate giảm xuống dưới 2% sau khi sửa.
 
-Evidence to capture:
+### Bằng chứng cần lưu
 
-- Screenshot of the error rate panel.
-- Example failed trace.
-- JSON log line containing `error_type` and `correlation_id`.
+- Ảnh chụp panel error rate.
+- Một trace lỗi đại diện.
+- JSON log chứa `error_type` và `correlation_id`.
 
-## 3. Cost budget spike
+<a id="3-cost-budget-spike"></a>
+## 3. Tăng đột biến chi phí
 
-- Alert name: `cost_budget_spike`
-- Severity: P2
-- Trigger: `hourly_cost_usd > 2x_baseline for 15m`
-- Related SLO: Daily Cost Budget < $2.50/day
-- Likely lab incident: `cost_spike`
-- Impact: token usage or model routing burns budget faster than expected.
+- **Tên alert**: `cost_budget_spike`
+- **Mức độ nghiêm trọng**: P2
+- **Điều kiện kích hoạt**: `hourly_cost_usd > 2x_baseline for 15m`
+- **SLO liên quan**: Daily Cost Budget < $2.50/day
+- **Incident lab có khả năng liên quan**: `cost_spike`
+- **Tác động**: token usage hoặc model routing làm ngân sách bị tiêu thụ nhanh hơn dự kiến.
 
-First checks:
+### Kiểm tra ban đầu
 
-1. Open the cost dashboard panel and confirm hourly cost is above 2x baseline.
-2. Split recent traces by feature, model, and user/session if available.
-3. Compare `tokens_in` and `tokens_out` for normal traffic versus spike traffic.
-4. Use logs with the same `correlation_id` to confirm request shape and feature.
-5. Check whether the incident toggle `cost_spike` is enabled.
+1. Mở panel cost trên dashboard và xác nhận hourly cost vượt 2 lần baseline.
+2. Tách các trace gần nhất theo feature, model và user/session nếu có.
+3. So sánh `tokens_in` và `tokens_out` giữa traffic bình thường và traffic tăng chi phí.
+4. Dùng log có cùng `correlation_id` để xác nhận request shape và feature.
+5. Kiểm tra incident toggle `cost_spike` có đang bật hay không.
 
-Mitigation:
+### Giảm thiểu
 
-- Shorten prompts and reduce retrieved context size.
-- Route simple requests to a cheaper model.
-- Cap max output tokens for the affected endpoint.
-- Enable or improve prompt caching if available.
-- Verify projected daily cost returns below $2.50/day.
+- Rút ngắn prompt và giảm kích thước retrieved context.
+- Route các request đơn giản sang model rẻ hơn.
+- Giới hạn max output tokens cho endpoint bị ảnh hưởng.
+- Bật hoặc cải thiện prompt caching nếu hệ thống hỗ trợ.
+- Xác nhận projected daily cost quay về dưới $2.50/day.
 
-Evidence to capture:
+### Bằng chứng cần lưu
 
-- Screenshot of the cost panel.
-- Trace showing abnormal token usage.
-- Before/after cost value after mitigation.
+- Ảnh chụp panel cost.
+- Trace thể hiện token usage bất thường.
+- Giá trị chi phí trước và sau khi giảm thiểu.
