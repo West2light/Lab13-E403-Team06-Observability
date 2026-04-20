@@ -57,7 +57,7 @@
 
 ### [MEMBER_A_NAME]
 - [TASKS_COMPLETED]: 
-- [EVIDENCE_LINK]: (Link to specific commit or PR)
+- [EVIDENCE_LINK]: 
 
 ### [MEMBER_B_NAME]
 - [TASKS_COMPLETED]: 
@@ -71,10 +71,9 @@
 - [TASKS_COMPLETED]: 
 - [EVIDENCE_LINK]: 
 
-### [MEMBER_E_NAME]
-- [TASKS_COMPLETED]: 
-- [EVIDENCE_LINK]: 
-
+### [Vương Hoàng Giang]
+- [TASKS_COMPLETED]: Xây dựng in-memory metrics helpers (app/metrics.py) với các hàm record_request, snapshot, percentile; viết dashboard-spec.md định nghĩa 6 panel; thu thập evidence chấm điểm (docs/grading-evidence.md); xây dựng dashboard HTML 6 panel tự động refresh từ /metrics endpoint (scripts/dashboard.html); hoàn thiện báo cáo blueprint-template.md; chạy load test và inject incident rag_slow để lấy evidence; chạy validate_logs.py đạt 100/100.
+- [EVIDENCE_LINK]: https://github.com/VinUni-AI20k/Lab13-Observability/commit/97117795181b0267da86e6806b87e67069340e62, https://github.com/VinUni-AI20k/Lab13-Observability/commit/02e95f442e5440d56da387092e404f4c56c321b4
 ---
 
 ## 6. Bonus Items (Optional)
